@@ -1,6 +1,7 @@
 
 
 import { useState } from 'react';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import { View, Text, Image, Pressable, TextInput, Button, Alert, ScrollView, StyleSheet, Platform, Modal } from 'react-native';
 
@@ -90,6 +91,7 @@ export default function App() {
 
 
   const handleSendPress = () => {
+    if (isSendDisabled) return;
     Alert.alert('Message sent', `To Alex: "${message.trim()}"`);
     setMessage('');
     setIsComposerOpen(false);
@@ -107,6 +109,8 @@ export default function App() {
 
 
   return (
+    <SafeAreaProvider>
+    <SafeAreaView style={styles.safe}>
     <ScrollView
       style={styles.screen}
       contentContainerStyle={styles.screenContent}
@@ -120,7 +124,7 @@ export default function App() {
         />
         <View style={styles.body}>
           <View style={styles.headerRow}>
-            <Pressable onPress={() => setIsOnline(!isOnline)}>
+            <Pressable accessibilityRole="button" accessibilityLabel={isOnline ? "Set status offline" : "Set status online"} onPress={() => setIsOnline(!isOnline)}>
               <Image source={require('./assets/avatar.png')} style={styles.avatar} />
               <View style={[styles.onlineBadge, !isOnline && styles.offlineBadge]} />
             </Pressable>
@@ -134,7 +138,7 @@ export default function App() {
           <Text style={styles.bio} numberOfLines={isBioExpanded ? undefined : 3}>
             {BIO}
           </Text>
-          <Pressable onPress={() => setIsBioExpanded(!isBioExpanded)}>
+          <Pressable accessibilityRole="button" onPress={() => setIsBioExpanded(!isBioExpanded)}>
             <Text style={styles.link}>{isBioExpanded ? 'Show less' : 'Read more'}</Text>
           </Pressable>
 
@@ -154,7 +158,7 @@ export default function App() {
             {SKILLS.map((skill) => {
               const isSelected = selectedSkills.includes(skill);
               return (
-                <Pressable
+                <Pressable accessibilityRole="button"
                   key={skill}
                   onPress={() => handleSkillPress(skill)}
                   style={({ pressed }) => [
@@ -186,7 +190,7 @@ export default function App() {
             ))}
           </ScrollView>
           <View style={styles.actions}>
-            <Pressable
+            <Pressable accessibilityRole="button"
               onPress={handleFollowPress}
               style={({ pressed }) => [
                 styles.button,
@@ -198,7 +202,7 @@ export default function App() {
                 {isFollowing ? 'Following' : 'Follow'}
               </Text>
             </Pressable>
-            <Pressable
+            <Pressable accessibilityRole="button"
               onPress={handleMessagePress}
               style={({ pressed }) => [styles.button, pressed && styles.pressed]}
             >
@@ -220,7 +224,7 @@ export default function App() {
                 <Text style={styles.counter}>
                   {message.length}/{MAX_MESSAGE} characters
                 </Text>
-                <Pressable
+                <Pressable accessibilityRole="button"
                   disabled={isSendDisabled}
                   onPress={handleSendPress}
                   style={({ pressed }) => [
@@ -244,6 +248,7 @@ export default function App() {
       </View>
 
       
+</ScrollView>
 <Modal animationType="fade" transparent visible={modalVisible} onRequestClose={closeModal}>
   <View style={styles.overlay}>
     <Pressable accessibilityRole="button" accessibilityLabel="Close share dialog" style={StyleSheet.absoluteFill} onPress={closeModal} />
@@ -266,7 +271,8 @@ export default function App() {
     </View>
   </View>
 </Modal>
-    </ScrollView>
+    </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
