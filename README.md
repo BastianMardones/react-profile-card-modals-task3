@@ -28,3 +28,11 @@ The seven checkpoint answers are in [ANSWERS.md](ANSWERS.md).
 ## Submission
 
 The branch is `task/modals-scrollview-safearea`, with one commit per step. Open a Pull Request and attach screenshots or a short recording showing the projects and the contact selection modal.
+
+## Android screenshots
+
+![Profile card](screenshots/01-profile.png)
+![Horizontal project scrolling](screenshots/02-projects-scroll.png)
+![No contacts selected](screenshots/03-contacts-empty.png)
+![Three selected contacts](screenshots/04-contacts-selected.png)
+![Native share confirmation](screenshots/05-share-alert.png)
