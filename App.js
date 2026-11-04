@@ -65,6 +65,8 @@ export default function App() {
     { label: 'Following', value: '180' },
   ];
 
+  const closeModal = () => { setModalVisible(false); };
+
   const handleFollowPress = () => {
     setIsFollowing(!isFollowing);
   };
@@ -219,7 +221,16 @@ export default function App() {
       </View>
 
       
-<Modal animationType="slide" transparent visible={modalVisible} onRequestClose={() => setModalVisible(false)}><View style={styles.overlay}><View style={styles.sheet}><Text>Hello, I am a Modal!</Text><Button title="Close Modal" onPress={() => setModalVisible(false)} /></View></View></Modal>
+<Modal animationType="fade" transparent visible={modalVisible} onRequestClose={closeModal}>
+  <View style={styles.overlay}>
+    <Pressable accessibilityRole="button" accessibilityLabel="Close share dialog" style={StyleSheet.absoluteFill} onPress={closeModal} />
+    <View style={styles.sheet}>
+      <Text style={styles.sheetTitle}>Share profile</Text>
+      <Text style={styles.sheetText}>Share Alex's profile with your team.</Text>
+      <Pressable accessibilityRole="button" onPress={closeModal} style={({ pressed }) => [styles.sheetClose, pressed && styles.pressed]}><Text style={styles.sheetCloseText}>Close</Text></Pressable>
+    </View>
+  </View>
+</Modal>
     </ScrollView>
   );
 }
