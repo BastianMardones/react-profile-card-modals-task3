@@ -162,6 +162,16 @@ export default function App() {
           </Text>
 
           
+          <Text style={styles.sectionTitle}>RECENT PROJECTS</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.projectsRow} testID="project-list">
+            {PROJECTS.map(project => (
+              <View key={project.name} style={styles.projectCard}>
+                <Text style={styles.projectName}>{project.name}</Text>
+                <Text style={styles.projectTech}>{project.tech}</Text>
+                <Text style={styles.projectStars}>★ {project.stars}</Text>
+              </View>
+            ))}
+          </ScrollView>
           <View style={styles.actions}>
             <Pressable
               onPress={handleFollowPress}
