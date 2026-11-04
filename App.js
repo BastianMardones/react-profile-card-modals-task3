@@ -1,69 +1,97 @@
-// TASK 3 — Modals, ScrollView and SafeAreaView (starter)
-// Start point: the solution of Task 2 + new data. Follow the steps in README.md.
-import { useState } from 'react';
-// TODO: add the imports you need in each step (Modal, SafeAreaView from 'react-native-safe-area-context'...)
-import { View, Text, Image, Pressable, TextInput, Button, Alert, ScrollView, StyleSheet, Platform } from 'react-native';
+import { useState } from "react";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+
+import {
+  View,
+  Text,
+  Image,
+  Pressable,
+  TextInput,
+  Button,
+  Alert,
+  ScrollView,
+  StyleSheet,
+  Platform,
+  Modal,
+} from "react-native";
 
 const COLORS = {
-  background: '#EEF1F6',
-  card: '#FFFFFF',
-  text: '#1B1F2A',
-  muted: '#6B7280',
-  primary: '#2F6FED',
-  primaryLight: '#E6EEFF',
-  border: '#E5E7EB',
-  online: '#22C55E',
-  offline: '#9CA3AF',
+  background: "#EEF1F6",
+  card: "#FFFFFF",
+  text: "#1B1F2A",
+  muted: "#6B7280",
+  primary: "#2F6FED",
+  primaryLight: "#E6EEFF",
+  border: "#E5E7EB",
+  online: "#22C55E",
+  offline: "#9CA3AF",
 };
 
 const BIO =
-  'Building cross-platform apps with React Native. I love clean layouts, accessible design and sharing what I learn with the community. When I am not coding, I mentor junior developers, contribute to open source and explore new coffee shops around the city.';
+  "Building cross-platform apps with React Native. I love clean layouts, accessible design and sharing what I learn with the community. When I am not coding, I mentor junior developers, contribute to open source and explore new coffee shops around the city.";
 
-const SKILLS = ['React Native', 'JavaScript', 'UI Design', 'Git', 'Flexbox'];
+const SKILLS = ["React Native", "JavaScript", "UI Design", "Git", "Flexbox"];
 const BASE_FOLLOWERS = 1200;
 const MAX_MESSAGE = 140;
 
 const PROJECTS = [
-  { name: 'Weather App', tech: 'React Native', stars: 128 },
-  { name: 'Task Tracker', tech: 'Expo', stars: 96 },
-  { name: 'Photo Gallery', tech: 'Expo Camera', stars: 74 },
-  { name: 'Recipe Book', tech: 'FlatList', stars: 61 },
-  { name: 'Chat UI', tech: 'Flexbox', stars: 45 },
+  { name: "Weather App", tech: "React Native", stars: 128 },
+  { name: "Task Tracker", tech: "Expo", stars: 96 },
+  { name: "Photo Gallery", tech: "Expo Camera", stars: 74 },
+  { name: "Recipe Book", tech: "FlatList", stars: 61 },
+  { name: "Chat UI", tech: "Flexbox", stars: 45 },
 ];
 
 const CONTACTS = [
-  'Ana López',
-  'Ben Carter',
-  'Carla Ruiz',
-  'David Kim',
-  'Elena Petrova',
-  'Farid Hassan',
-  'Grace Liu',
-  'Hugo Silva',
+  "Ana López",
+  "Ben Carter",
+  "Carla Ruiz",
+  "David Kim",
+  "Elena Petrova",
+  "Farid Hassan",
+  "Grace Liu",
+  "Hugo Silva",
 ];
 
-// Adds thousands separators: 1200 -> '1,200'
 function formatCount(n) {
-  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
 }
 
 export default function App() {
+  const [selectedContacts, setSelectedContacts] = useState([]);
+  const isShareDisabled = selectedContacts.length === 0;
+  const [modalVisible, setModalVisible] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [isComposerOpen, setIsComposerOpen] = useState(false);
-  const [message, setMessage] = useState('');
+  const [message, setMessage] = useState("");
   const [isBioExpanded, setIsBioExpanded] = useState(false);
   const [isOnline, setIsOnline] = useState(true);
   const [selectedSkills, setSelectedSkills] = useState([]);
-  // TODO STEP 1: add the state that says if the modal is visible
-  // TODO STEP 4: add the state for the selected contacts (an array)
 
   const followers = BASE_FOLLOWERS + (isFollowing ? 1 : 0);
   const isSendDisabled = message.trim().length === 0;
   const stats = [
-    { label: 'Projects', value: '24' },
-    { label: 'Followers', value: formatCount(followers) },
-    { label: 'Following', value: '180' },
+    { label: "Projects", value: "24" },
+    { label: "Followers", value: formatCount(followers) },
+    { label: "Following", value: "180" },
   ];
+
+  const closeModal = () => {
+    setModalVisible(false);
+    setSelectedContacts([]);
+  };
+  const handleContactPress = (name) => {
+    setSelectedContacts((previous) =>
+      previous.includes(name)
+        ? previous.filter((item) => item !== name)
+        : [...previous, name],
+    );
+  };
+  const handleConfirmShare = () => {
+    if (isShareDisabled) return;
+    Alert.alert("Profile shared", "Sent to: " + selectedContacts.join(", "));
+    closeModal();
+  };
 
   const handleFollowPress = () => {
     setIsFollowing(!isFollowing);
@@ -73,164 +101,293 @@ export default function App() {
     setIsComposerOpen(!isComposerOpen);
   };
 
-  const handleSharePress = () => {
-    Alert.alert('Share profile', 'Sharing is not implemented yet.');
-  };
-
   const handleSendPress = () => {
-    Alert.alert('Message sent', `To Alex: "${message.trim()}"`);
-    setMessage('');
+    if (isSendDisabled) return;
+    Alert.alert("Message sent", `To Alex: "${message.trim()}"`);
+    setMessage("");
     setIsComposerOpen(false);
   };
 
   const handleSkillPress = (skill) => {
-    // Never modify the array directly: create a new one.
     setSelectedSkills(
       selectedSkills.includes(skill)
         ? selectedSkills.filter((item) => item !== skill)
-        : [...selectedSkills, skill]
+        : [...selectedSkills, skill],
     );
   };
 
-  // TODO STEP 2: write closeModal
-  // TODO STEP 4: write handleContactPress and handleConfirmShare
-
-  // TODO STEP 5: wrap the whole screen in a SafeAreaView
   return (
-    <ScrollView
-      style={styles.screen}
-      contentContainerStyle={styles.screenContent}
-      keyboardShouldPersistTaps="handled"
-    >
-      <View style={styles.card}>
-        <Image
-          source={require('./assets/banner.png')}
-          style={styles.banner}
-          resizeMode="cover"
-        />
-        <View style={styles.body}>
-          <View style={styles.headerRow}>
-            <Pressable onPress={() => setIsOnline(!isOnline)}>
-              <Image source={require('./assets/avatar.png')} style={styles.avatar} />
-              <View style={[styles.onlineBadge, !isOnline && styles.offlineBadge]} />
-            </Pressable>
-            <View style={styles.headerText}>
-              <Text style={styles.name}>Alex Rivera</Text>
-              <Text style={styles.role}>Mobile Developer</Text>
-              <Text style={styles.location}>Lisbon, Portugal</Text>
-            </View>
-          </View>
-
-          <Text style={styles.bio} numberOfLines={isBioExpanded ? undefined : 3}>
-            {BIO}
-          </Text>
-          <Pressable onPress={() => setIsBioExpanded(!isBioExpanded)}>
-            <Text style={styles.link}>{isBioExpanded ? 'Show less' : 'Read more'}</Text>
-          </Pressable>
-
-          <View style={styles.statsRow}>
-            {stats.map((item, index) => (
-              <View
-                key={item.label}
-                style={[styles.stat, index < stats.length - 1 && styles.statDivider]}
-              >
-                <Text style={styles.statValue}>{item.value}</Text>
-                <Text style={styles.statLabel}>{item.label}</Text>
-              </View>
-            ))}
-          </View>
-
-          <View style={styles.tags}>
-            {SKILLS.map((skill) => {
-              const isSelected = selectedSkills.includes(skill);
-              return (
+    <SafeAreaProvider>
+      <SafeAreaView style={styles.safe}>
+        <ScrollView
+          style={styles.screen}
+          contentContainerStyle={styles.screenContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.card}>
+            <Image
+              source={require("./assets/banner.png")}
+              style={styles.banner}
+              resizeMode="cover"
+            />
+            <View style={styles.body}>
+              <View style={styles.headerRow}>
                 <Pressable
-                  key={skill}
-                  onPress={() => handleSkillPress(skill)}
+                  accessibilityRole="button"
+                  accessibilityLabel={
+                    isOnline ? "Set status offline" : "Set status online"
+                  }
+                  onPress={() => setIsOnline(!isOnline)}
+                >
+                  <Image
+                    source={require("./assets/avatar.png")}
+                    style={styles.avatar}
+                  />
+                  <View
+                    style={[
+                      styles.onlineBadge,
+                      !isOnline && styles.offlineBadge,
+                    ]}
+                  />
+                </Pressable>
+                <View style={styles.headerText}>
+                  <Text style={styles.name}>Alex Rivera</Text>
+                  <Text style={styles.role}>Mobile Developer</Text>
+                  <Text style={styles.location}>Lisbon, Portugal</Text>
+                </View>
+              </View>
+
+              <Text
+                style={styles.bio}
+                numberOfLines={isBioExpanded ? undefined : 3}
+              >
+                {BIO}
+              </Text>
+              <Pressable
+                accessibilityRole="button"
+                onPress={() => setIsBioExpanded(!isBioExpanded)}
+              >
+                <Text style={styles.link}>
+                  {isBioExpanded ? "Show less" : "Read more"}
+                </Text>
+              </Pressable>
+
+              <View style={styles.statsRow}>
+                {stats.map((item, index) => (
+                  <View
+                    key={item.label}
+                    style={[
+                      styles.stat,
+                      index < stats.length - 1 && styles.statDivider,
+                    ]}
+                  >
+                    <Text style={styles.statValue}>{item.value}</Text>
+                    <Text style={styles.statLabel}>{item.label}</Text>
+                  </View>
+                ))}
+              </View>
+
+              <View style={styles.tags}>
+                {SKILLS.map((skill) => {
+                  const isSelected = selectedSkills.includes(skill);
+                  return (
+                    <Pressable
+                      accessibilityRole="button"
+                      key={skill}
+                      onPress={() => handleSkillPress(skill)}
+                      style={({ pressed }) => [
+                        styles.tag,
+                        isSelected && styles.tagSelected,
+                        pressed && styles.pressed,
+                      ]}
+                    >
+                      <Text
+                        style={[
+                          styles.tagText,
+                          isSelected && styles.tagTextSelected,
+                        ]}
+                      >
+                        {skill}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+              <Text style={styles.hint}>
+                Tap a skill to select it · {selectedSkills.length} selected
+              </Text>
+
+              <Text style={styles.sectionTitle}>RECENT PROJECTS</Text>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.projectsRow}
+                testID="project-list"
+              >
+                {PROJECTS.map((project) => (
+                  <View key={project.name} style={styles.projectCard}>
+                    <Text style={styles.projectName}>{project.name}</Text>
+                    <Text style={styles.projectTech}>{project.tech}</Text>
+                    <Text style={styles.projectStars}>★ {project.stars}</Text>
+                  </View>
+                ))}
+              </ScrollView>
+              <View style={styles.actions}>
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={handleFollowPress}
                   style={({ pressed }) => [
-                    styles.tag,
-                    isSelected && styles.tagSelected,
+                    styles.button,
+                    isFollowing ? styles.buttonFollowing : styles.buttonPrimary,
                     pressed && styles.pressed,
                   ]}
                 >
-                  <Text style={[styles.tagText, isSelected && styles.tagTextSelected]}>
-                    {skill}
+                  <Text
+                    style={[
+                      styles.buttonText,
+                      !isFollowing && styles.buttonTextPrimary,
+                    ]}
+                  >
+                    {isFollowing ? "Following" : "Follow"}
                   </Text>
                 </Pressable>
-              );
-            })}
-          </View>
-          <Text style={styles.hint}>
-            Tap a skill to select it · {selectedSkills.length} selected
-          </Text>
-
-          {/* TODO STEP 3: add the 'Recent projects' horizontal ScrollView here (use PROJECTS) */}
-          <View style={styles.actions}>
-            <Pressable
-              onPress={handleFollowPress}
-              style={({ pressed }) => [
-                styles.button,
-                isFollowing ? styles.buttonFollowing : styles.buttonPrimary,
-                pressed && styles.pressed,
-              ]}
-            >
-              <Text style={[styles.buttonText, !isFollowing && styles.buttonTextPrimary]}>
-                {isFollowing ? 'Following' : 'Follow'}
-              </Text>
-            </Pressable>
-            <Pressable
-              onPress={handleMessagePress}
-              style={({ pressed }) => [styles.button, pressed && styles.pressed]}
-            >
-              <Text style={styles.buttonText}>{isComposerOpen ? 'Close' : 'Message'}</Text>
-            </Pressable>
-          </View>
-
-          {isComposerOpen && (
-            <View style={styles.composer}>
-              <TextInput
-                style={styles.input}
-                placeholder="Write a message to Alex"
-                placeholderTextColor={COLORS.muted}
-                value={message}
-                onChangeText={(newText) => setMessage(newText)}
-                maxLength={MAX_MESSAGE}
-              />
-              <View style={styles.composerFooter}>
-                <Text style={styles.counter}>
-                  {message.length}/{MAX_MESSAGE} characters
-                </Text>
                 <Pressable
-                  disabled={isSendDisabled}
-                  onPress={handleSendPress}
+                  accessibilityRole="button"
+                  onPress={handleMessagePress}
                   style={({ pressed }) => [
-                    styles.sendButton,
-                    isSendDisabled && styles.sendButtonDisabled,
+                    styles.button,
                     pressed && styles.pressed,
                   ]}
                 >
-                  <Text style={styles.sendText}>Send</Text>
+                  <Text style={styles.buttonText}>
+                    {isComposerOpen ? "Close" : "Message"}
+                  </Text>
                 </Pressable>
               </View>
+
+              {isComposerOpen && (
+                <View style={styles.composer}>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Write a message to Alex"
+                    placeholderTextColor={COLORS.muted}
+                    value={message}
+                    onChangeText={(newText) => setMessage(newText)}
+                    maxLength={MAX_MESSAGE}
+                  />
+                  <View style={styles.composerFooter}>
+                    <Text style={styles.counter}>
+                      {message.length}/{MAX_MESSAGE} characters
+                    </Text>
+                    <Pressable
+                      accessibilityRole="button"
+                      disabled={isSendDisabled}
+                      onPress={handleSendPress}
+                      style={({ pressed }) => [
+                        styles.sendButton,
+                        isSendDisabled && styles.sendButtonDisabled,
+                        pressed && styles.pressed,
+                      ]}
+                    >
+                      <Text style={styles.sendText}>Send</Text>
+                    </Pressable>
+                  </View>
+                </View>
+              )}
+
+              <View style={styles.shareWrapper}>
+                <Button
+                  title="Share profile"
+                  color={COLORS.primary}
+                  onPress={() => setModalVisible(true)}
+                />
+              </View>
             </View>
-          )}
-
-
-          <View style={styles.shareWrapper}>
-            {/* TODO STEP 1: this button must open the modal (replace the Alert) */}
-            <Button title="Share profile" color={COLORS.primary} onPress={handleSharePress} />
           </View>
-        </View>
-      </View>
-
-      {/* TODO STEP 1-4: add the <Modal> here */}
-    </ScrollView>
+        </ScrollView>
+        <Modal
+          animationType="fade"
+          transparent
+          visible={modalVisible}
+          onRequestClose={closeModal}
+        >
+          <View style={styles.overlay}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Close share dialog"
+              style={StyleSheet.absoluteFill}
+              onPress={closeModal}
+            />
+            <View style={styles.sheet}>
+              <Text style={styles.sheetTitle}>Share profile</Text>
+              <Text style={styles.sheetText}>
+                Choose who gets Alex's profile.
+              </Text>
+              <ScrollView style={styles.contactList} testID="contact-list">
+                {CONTACTS.map((name) => {
+                  const selected = selectedContacts.includes(name);
+                  return (
+                    <Pressable
+                      key={name}
+                      accessibilityRole="checkbox"
+                      accessibilityLabel={name}
+                      accessibilityState={{ checked: selected }}
+                      onPress={() => handleContactPress(name)}
+                      style={({ pressed }) => [
+                        styles.contactRow,
+                        pressed && styles.pressed,
+                      ]}
+                    >
+                      <Text style={styles.contactName}>{name}</Text>
+                      <View
+                        style={[
+                          styles.checkbox,
+                          selected && styles.checkboxSelected,
+                        ]}
+                      >
+                        {selected && <Text style={styles.checkMark}>✓</Text>}
+                      </View>
+                    </Pressable>
+                  );
+                })}
+              </ScrollView>
+              <Pressable
+                accessibilityRole="button"
+                disabled={isShareDisabled}
+                onPress={handleConfirmShare}
+                style={({ pressed }) => [
+                  styles.shareButton,
+                  isShareDisabled && styles.shareButtonDisabled,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <Text style={styles.shareButtonText}>
+                  {isShareDisabled
+                    ? "Select contacts"
+                    : "Share with " + selectedContacts.length}
+                </Text>
+              </Pressable>
+              <Pressable
+                accessibilityRole="button"
+                onPress={closeModal}
+                style={({ pressed }) => [
+                  styles.sheetClose,
+                  pressed && styles.pressed,
+                ]}
+              >
+                <Text style={styles.sheetCloseText}>Cancel</Text>
+              </Pressable>
+            </View>
+          </View>
+        </Modal>
+      </SafeAreaView>
+    </SafeAreaProvider>
   );
 }
 
 const cardShadow = Platform.select({
   ios: {
-    shadowColor: '#000000',
+    shadowColor: "#000000",
     shadowOpacity: 0.12,
     shadowRadius: 16,
     shadowOffset: { width: 0, height: 8 },
@@ -248,7 +405,7 @@ const styles = StyleSheet.create({
   },
   screenContent: {
     flexGrow: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     paddingHorizontal: 20,
     paddingVertical: 40,
   },
@@ -258,7 +415,7 @@ const styles = StyleSheet.create({
     ...cardShadow,
   },
   banner: {
-    width: '100%',
+    width: "100%",
     height: 120,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
@@ -268,8 +425,8 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   headerRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
+    flexDirection: "row",
+    alignItems: "flex-start",
     marginTop: -44,
   },
   avatar: {
@@ -280,7 +437,7 @@ const styles = StyleSheet.create({
     borderColor: COLORS.card,
   },
   onlineBadge: {
-    position: 'absolute',
+    position: "absolute",
     right: 4,
     bottom: 4,
     width: 18,
@@ -300,12 +457,12 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 22,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.text,
   },
   role: {
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.primary,
     marginTop: 2,
   },
@@ -323,11 +480,11 @@ const styles = StyleSheet.create({
   link: {
     marginTop: 4,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.primary,
   },
   statsRow: {
-    flexDirection: 'row',
+    flexDirection: "row",
     marginTop: 18,
     borderTopWidth: 1,
     borderBottomWidth: 1,
@@ -335,7 +492,7 @@ const styles = StyleSheet.create({
   },
   stat: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 12,
   },
   statDivider: {
@@ -344,7 +501,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: "700",
     color: COLORS.text,
   },
   statLabel: {
@@ -353,8 +510,8 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   tags: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+    flexDirection: "row",
+    flexWrap: "wrap",
     gap: 8,
     marginTop: 16,
   },
@@ -366,14 +523,14 @@ const styles = StyleSheet.create({
   },
   tagText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.primary,
   },
   tagSelected: {
     backgroundColor: COLORS.primary,
   },
   tagTextSelected: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
   },
   hint: {
     marginTop: 8,
@@ -381,13 +538,13 @@ const styles = StyleSheet.create({
     color: COLORS.muted,
   },
   actions: {
-    flexDirection: 'row',
+    flexDirection: "row",
     gap: 12,
     marginTop: 20,
   },
   button: {
     flex: 1,
-    alignItems: 'center',
+    alignItems: "center",
     paddingVertical: 12,
     borderRadius: 12,
     borderWidth: 1.5,
@@ -401,11 +558,11 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: "600",
     color: COLORS.primary,
   },
   buttonTextPrimary: {
-    color: '#FFFFFF',
+    color: "#FFFFFF",
   },
   pressed: {
     opacity: 0.6,
@@ -423,9 +580,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   composerFooter: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginTop: 8,
   },
   counter: {
@@ -443,11 +600,133 @@ const styles = StyleSheet.create({
   },
   sendText: {
     fontSize: 14,
-    fontWeight: '600',
-    color: '#FFFFFF',
+    fontWeight: "600",
+    color: "#FFFFFF",
   },
   shareWrapper: {
     marginTop: 12,
-    alignItems: 'center',
+    alignItems: "center",
+  },
+  overlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  sheet: {
+    width: "100%",
+    maxWidth: 420,
+    padding: 20,
+    borderRadius: 20,
+    backgroundColor: COLORS.card,
+  },
+  sheetTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: COLORS.text,
+  },
+  sheetText: {
+    marginTop: 4,
+    marginBottom: 12,
+    fontSize: 14,
+    color: COLORS.muted,
+  },
+  sheetClose: {
+    marginTop: 8,
+    paddingVertical: 10,
+    alignItems: "center",
+  },
+  sheetCloseText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: COLORS.primary,
+  },
+  sectionTitle: {
+    marginTop: 18,
+    marginBottom: 10,
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+    color: COLORS.muted,
+  },
+  projectsRow: {
+    gap: 12,
+    paddingRight: 4,
+  },
+  projectCard: {
+    width: 140,
+    padding: 14,
+    borderRadius: 14,
+    backgroundColor: COLORS.primaryLight,
+  },
+  projectName: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: COLORS.text,
+  },
+  projectTech: {
+    marginTop: 4,
+    fontSize: 12,
+    color: COLORS.muted,
+  },
+  projectStars: {
+    marginTop: 12,
+    fontSize: 13,
+    fontWeight: "600",
+    color: COLORS.primary,
+  },
+  contactList: {
+    maxHeight: 240,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: COLORS.border,
+  },
+  contactRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
+  },
+  contactName: {
+    fontSize: 15,
+    color: COLORS.text,
+  },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    borderWidth: 1.5,
+    borderColor: COLORS.offline,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  checkboxSelected: {
+    borderColor: COLORS.primary,
+    backgroundColor: COLORS.primary,
+  },
+  checkMark: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#FFFFFF",
+  },
+  shareButton: {
+    marginTop: 16,
+    paddingVertical: 12,
+    borderRadius: 12,
+    alignItems: "center",
+    backgroundColor: COLORS.primary,
+  },
+  shareButtonDisabled: {
+    backgroundColor: COLORS.offline,
+  },
+  shareButtonText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#FFFFFF",
+  },
+  safe: {
+    flex: 1,
+    backgroundColor: COLORS.background,
   },
 });
